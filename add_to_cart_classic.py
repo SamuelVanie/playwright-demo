@@ -52,7 +52,7 @@ def main():
     with sync_playwright() as p:
         # Launch browser in headless mode
         browser = p.chromium.launch(
-            headless=True,
+            headless=False,
             channel="msedge"
         )
         
@@ -71,11 +71,13 @@ def main():
         
         # Process each URL
         success_count = 0
+        page = context.new_page()
+
         for url in cart:
-            page = context.new_page()
             if add_to_cart(page, url):
                 success_count += 1
-            page.close()
+                
+        page.close()
         
         # Summary
         print(f"\n{'='*50}")

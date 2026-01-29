@@ -93,7 +93,7 @@ def main():
     
     with sync_playwright() as p:
         # 1. Server Optimization: Headless is faster
-        browser = p.chromium.launch(headless=True, channel="msedge")
+        browser = p.chromium.launch(headless=False, channel="msedge")
 
         # List of the articles to add to the cart
         cart = ["https://www.amazon.fr/-/en/JBL-Wireless-Headphones-Adaptive-Cancelling/dp/B09CYX92NB?pd_rd_w=RKAbJ&content-id=amzn1.sym.284f37d8-e6cd-4216-9f25-ad7ef67b15ed&pf_rd_p=284f37d8-e6cd-4216-9f25-ad7ef67b15ed&pf_rd_r=V1G2ET69GYAQ4HHJN3E6&pd_rd_wg=IccB9&pd_rd_r=24b69cef-22c5-4ecb-b8eb-daacfe34f62d&pd_rd_i=B09CYX92NB&th=1", "https://www.amazon.fr/-/en/Remember-me/dp/B0098VWTT2?crid=2G2RPG5AQLO65&dib=eyJ2IjoiMSJ9.sn8xt4H4e5DIIrfCJJpVh70cFt3PnpnT4K88ZJ3IRbhHNqZCj4pC073gy0XiYzdTbVW5e2ACinL1Tr4iomiwKX-6J_tYOCs683U79GLUlL0.Wg80dgXML8MZRQbvCihN6h2sFBRcWLM8JXJ4MI6IS_E&dib_tag=se&keywords=remember+me+xbox+360&qid=1769640266&sprefix=remember+me+xbox%2Caps%2C215&sr=8-1"]

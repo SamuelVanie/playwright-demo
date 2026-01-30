@@ -15,7 +15,7 @@
       in
         {
           devShell = pkgs.mkShell {
-            buildInputs = with pkgs; [ python313Packages.playwright python313Packages.python python313Packages.opencv4 python313Packages.numpy ];
+            buildInputs = with pkgs; [ python313Packages.playwright python313Packages.python python313Packages.opencv4 python313Packages.numpy python313Packages.debugpy ];
           };
         });
 }

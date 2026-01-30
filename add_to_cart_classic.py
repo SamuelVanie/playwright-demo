@@ -56,6 +56,11 @@ def add_to_cart(page, url):
     """
     Navigate to a product page and click the add-to-cart button using DOM selectors.
 
+    Uses multiple selector strategies to handle:
+    - Dynamic ID suffixes (e.g., add-to-cart-button-ubb)
+    - Different text variations ("Add to Cart" vs "Add to basket")
+    - Anti-bot protection measures
+
     Args:
         page: Playwright page object
         url: Product page URL
@@ -71,25 +76,74 @@ def add_to_cart(page, url):
         # Handle cookie popup if present
         handle_cookie_popup(page)
 
-        # Wait for the add-to-cart button to be visible
-        # Using the class name provided: 'add-to-cart-button'
-        # print("Waiting for add-to-cart button...")
-        # page.wait_for_selector(
-        #     ".add-to-cart-button",
-        #     state="visible",
-        #     timeout=15000
-        # )
+        # Multi-strategy selector approach to handle dynamic IDs and text variations
+        # Priority order: most stable selectors first, then fallbacks
+        button_selectors = [
+            # 1. Input by name attribute (most stable - Amazon rarely changes this)
+            ("input[name='submit.add-to-cart']", "name attribute"),
+
+            # 2. Input with ID starting with prefix (catches dynamic suffixes like -ubb, -xyz)
+            ("input[id^='add-to-cart-button']", "ID prefix (dynamic suffix)"),
+
+            # 3. Any element with ID starting with prefix (catches both input and button)
+            ("[id^='add-to-cart-button']", "ID prefix (any element)"),
+
+            # 4. Input by exact text - "Add to Cart"
+            ("input:has-text('Add to Cart')", "text 'Add to Cart'"),
+
+            # 5. Input by exact text - "Add to basket" (UK/EU variation)
+            ("input:has-text('Add to basket')", "text 'Add to basket'"),
+
+            # 6. Button by exact text - "Add to Cart"
+            ("button:has-text('Add to Cart')", "button with text 'Add to Cart'"),
+
+            # 7. Button by exact text - "Add to basket"
+            ("button:has-text('Add to basket')", "button with text 'Add to basket'"),
+
+            # 8. Any element with "Add to Cart" text (broadest fallback)
+            (":has-text('Add to Cart')", "any element with 'Add to Cart'"),
+
+            # 9. Any element with "Add to basket" text (broadest fallback)
+            (":has-text('Add to basket')", "any element with 'Add to basket'"),
+        ]
+
+        # Try each selector strategy
+        print("Searching for add-to-cart/basket button...")
+        button_found = False
+        button_locator = None
+        matched_strategy = None
+
+        for selector, strategy_name in button_selectors:
+            try:
+                button_locator = page.locator(selector).first
+                if button_locator.is_visible(timeout=2000):
+                    print(f"✓ Found button using: {strategy_name}")
+                    print(f"  Selector: {selector}")
+                    button_found = True
+                    matched_strategy = strategy_name
+                    break
+            except Exception:
+                # Selector not found or not visible, try next one
+                continue
+
+        if not button_found:
+            print("✗ Button not found with any selector strategy")
+            print("  Attempted strategies:")
+            for _, strategy_name in button_selectors:
+                print(f"    - {strategy_name}")
+            return False
+
+        # Click the button
+        print(f"Clicking add-to-cart/basket button...")
+        button_locator.click()
+
+        print(f"✓ Successfully clicked add-to-cart/basket button (matched: {matched_strategy})")
         time.sleep(5)
-
-        # Click the button using direct DOM interaction
-        print("Clicking add-to-cart button...")
-        page.locator(".add-to-cart-button").click()
-
-        print("✓ Successfully clicked add-to-cart button")
+        
         return True
 
     except PlaywrightTimeoutError:
-        print("✗ Timeout: Add-to-cart button not found or not visible")
+        print("✗ Timeout: Add-to-cart/basket button not found or not visible")
         return False
     except Exception as e:
         print(f"✗ Error: {e}")
